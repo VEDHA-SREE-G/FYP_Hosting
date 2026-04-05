@@ -3,6 +3,7 @@ const SchemeEligibility = require("../models/schemeEligibility");
 const UserProfile = require("../models/UserProfile");
 const FuzzyEligibilityMatcher = require("../utils/fuzzyEligibilityMatcher");
 const { Op } = require("sequelize");
+const sequelize = require("../config/db");
 
 // GET DASHBOARD STATS
 exports.getDashboardStats = async (req, res) => {
@@ -201,5 +202,67 @@ exports.getFeaturedSchemes = async (req, res) => {
     } catch (err) {
         console.error("Error fetching featured schemes:", err);
         res.status(500).json({ error: "Server error fetching featured schemes" });
+    }
+};
+
+// GET ADMIN ANALYTICS
+exports.getAdminAnalytics = async (req, res) => {
+    try {
+        const schemesByLevel = await Scheme.findAll({
+            attributes: ['scheme_level', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+            group: ['scheme_level'],
+            raw: true
+        });
+        
+        const usersByState = await UserProfile.findAll({
+            attributes: ['state', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+            group: ['state'],
+            where: { state: { [Op.ne]: null, [Op.ne]: '' } },
+            order: [[sequelize.fn('COUNT', sequelize.col('id')), 'DESC']],
+            limit: 5,
+            raw: true
+        });
+
+        schemesByLevel.forEach(s => s.count = parseInt(s.count || s['COUNT(id)'], 10) || 0);
+        usersByState.forEach(u => u.count = parseInt(u.count || u['COUNT(id)'], 10) || 0);
+
+        res.json({ schemesByLevel, usersByState });
+    } catch (err) {
+        console.error("Error fetching admin analytics:", err);
+        res.status(500).json({ error: "Server error fetching admin analytics" });
+    }
+};
+
+// GET USER ANALYTICS
+exports.getUserAnalytics = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const userProfile = await UserProfile.findOne({ where: { userId } });
+        if (!userProfile) {
+            return res.json({
+                matchDistribution: [],
+               totalMatchesAnalyzed: 0
+            });
+        }
+        const matchResult = await FuzzyEligibilityMatcher.findMatchingSchemes(userId, 0);
+        
+        let high = 0, medium = 0, low = 0;
+        matchResult.schemes.forEach(m => {
+            if (m.matchScore >= 80) high++;
+            else if (m.matchScore >= 50) medium++;
+            else low++;
+        });
+
+        res.json({ 
+            matchDistribution: [
+                { name: 'High Match (>80%)', value: high, fill: '#10B981' },
+                { name: 'Medium Match (50-80%)', value: medium, fill: '#3B82F6' },
+                { name: 'Low Match (<50%)', value: low, fill: '#EF4444' }
+            ],
+            totalMatchesAnalyzed: matchResult.schemes.length
+        });
+    } catch (err) {
+        console.error("Error fetching user analytics:", err);
+        res.status(500).json({ error: "Server error fetching user analytics" });
     }
 };

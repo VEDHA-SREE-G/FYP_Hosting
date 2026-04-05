@@ -1,3 +1,498 @@
+// import React, { useState, useEffect } from 'react';
+// import { useNavigate, useParams } from 'react-router-dom';
+
+// const SchemeDetail = () => {
+//     const { id } = useParams();
+//     const navigate = useNavigate();
+
+//     const [scheme, setScheme] = useState(null);
+//     const [eligibility, setEligibility] = useState(null);
+//     const [loading, setLoading] = useState(true);
+//     const [error, setError] = useState(null);
+//     const [activeTab, setActiveTab] = useState('overview');
+
+//     useEffect(() => {
+//         fetchSchemeDetails();
+//     }, [id]);
+
+//     const fetchSchemeDetails = async () => {
+//         try {
+//             const token = localStorage.getItem('token');
+
+//             const response = await fetch(
+//                 `http://localhost:5000/api/schemes/${id}`,
+//                 {
+//                     headers: {
+//                         Authorization: `Bearer ${token}`,
+//                         'Content-Type': 'application/json'
+//                     }
+//                 }
+//             );
+
+//             if (response.ok) {
+//                 const data = await response.json();
+
+//                 setScheme(data.scheme);
+
+//                 setEligibility(
+//                     data.eligibility || {
+//                         score: data.score,
+//                         fuzzyLabel: data.fuzzyLabel,
+//                         eligible: data.eligible,
+//                         matchDetails: data.matchDetails
+//                     }
+//                 );
+//             } else {
+//                 setError('Scheme not found');
+//             }
+//         } catch (err) {
+//             console.error('Error fetching scheme details:', err);
+//             setError('Failed to load scheme details');
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     const tabs = [
+//         { id: 'overview', label: '📋 Overview' },
+//         { id: 'eligibility', label: '✅ Eligibility' },
+//         { id: 'benefits', label: '🎁 Benefits' },
+//         { id: 'apply', label: '📝 How to Apply' },
+//         { id: 'documents', label: '📁 Documents' }
+//     ];
+
+//     const renderMatchBadge = (score) => {
+//         if (score === undefined || score === null) return null;
+
+//         const pct = Math.round(score);
+
+//         let color =
+//             pct >= 80
+//                 ? '#16a34a'
+//                 : pct >= 60
+//                 ? '#d97706'
+//                 : '#dc2626';
+
+//         let bg =
+//             pct >= 80
+//                 ? '#f0fdf4'
+//                 : pct >= 60
+//                 ? '#fffbeb'
+//                 : '#fef2f2';
+
+//         let border =
+//             pct >= 80
+//                 ? '#86efac'
+//                 : pct >= 60
+//                 ? '#fcd34d'
+//                 : '#fca5a5';
+
+//         return (
+//             <div
+//                 style={{
+//                     display: 'inline-flex',
+//                     alignItems: 'center',
+//                     gap: '8px',
+//                     background: bg,
+//                     border: `1.5px solid ${border}`,
+//                     color: color,
+//                     borderRadius: '999px',
+//                     padding: '6px 16px',
+//                     fontWeight: 700,
+//                     fontSize: '14px'
+//                 }}
+//             >
+//                 <span
+//                     style={{
+//                         width: 36,
+//                         height: 36,
+//                         borderRadius: '50%',
+//                         background: color,
+//                         color: '#fff',
+//                         display: 'flex',
+//                         alignItems: 'center',
+//                         justifyContent: 'center',
+//                         fontSize: '13px',
+//                         fontWeight: 800
+//                     }}
+//                 >
+//                     {pct}%
+//                 </span>
+//                 Match Score
+//             </div>
+//         );
+//     };
+
+//     const renderFuzzyLabel = () => {
+//         if (!eligibility?.fuzzyLabel) return null;
+
+//         const label = eligibility.fuzzyLabel;
+
+//         const bg =
+//             label === 'HIGH'
+//                 ? '#dcfce7'
+//                 : label === 'MEDIUM'
+//                 ? '#fef3c7'
+//                 : '#fee2e2';
+
+//         const color =
+//             label === 'HIGH'
+//                 ? '#15803d'
+//                 : label === 'MEDIUM'
+//                 ? '#b45309'
+//                 : '#dc2626';
+
+//         const displayText =
+//             label === 'HIGH'
+//                 ? 'Highly Recommended'
+//                 : label === 'MEDIUM'
+//                 ? 'Moderately Recommended'
+//                 : 'Less Suitable';
+
+//         return (
+//             <div
+//                 style={{
+//                     marginTop: '10px',
+//                     display: 'inline-block',
+//                     padding: '6px 14px',
+//                     borderRadius: '999px',
+//                     background: bg,
+//                     color: color,
+//                     fontWeight: 700,
+//                     fontSize: '13px'
+//                 }}
+//             >
+//                 {displayText}
+//             </div>
+//         );
+//     };
+
+//     const renderTextBlock = (text, emptyMsg) => {
+//         if (!text) {
+//             return (
+//                 <p style={{ color: '#9ca3af', fontStyle: 'italic' }}>
+//                     {emptyMsg}
+//                 </p>
+//             );
+//         }
+
+//         return (
+//             <p
+//                 style={{
+//                     color: '#374151',
+//                     lineHeight: 1.8,
+//                     fontSize: '15px'
+//                 }}
+//             >
+//                 {text}
+//             </p>
+//         );
+//     };
+
+//     if (loading) {
+//         return (
+//             <div style={styles.loadingContainer}>
+//                 <div style={styles.spinner}></div>
+//                 <p>Loading scheme details...</p>
+//             </div>
+//         );
+//     }
+
+//     if (error) {
+//         return (
+//             <div style={styles.loadingContainer}>
+//                 <h2>{error}</h2>
+//                 <button
+//                     onClick={() => navigate(-1)}
+//                     style={styles.backBtn}
+//                 >
+//                     ← Go Back
+//                 </button>
+//             </div>
+//         );
+//     }
+
+//     return (
+//         <div style={styles.page}>
+//             <header style={styles.header}>
+//                 <div style={styles.headerMain}>
+//                     <div
+//                         onClick={() => navigate('/user/home')}
+//                         style={{ cursor: 'pointer' }}
+//                     >
+//                         <span style={{ fontWeight: 700 }}>
+//                             User Dashboard
+//                         </span>
+//                     </div>
+//                 </div>
+//             </header>
+
+//             <div style={styles.hero}>
+//                 <div style={styles.heroInner}>
+//                     <span style={styles.levelBadge}>
+//                         {scheme?.scheme_level || 'Central'}
+//                     </span>
+
+//                     <div style={{ marginTop: '12px' }}>
+//                         {renderMatchBadge(
+//                             eligibility?.matchScore ||
+//                                 eligibility?.score
+//                         )}
+//                     </div>
+
+//                     {renderFuzzyLabel()}
+
+//                     <h1 style={styles.heroTitle}>
+//                         {scheme?.scheme_name}
+//                     </h1>
+
+//                     <p style={{ color: '#fff' }}>
+//                         {scheme?.ministry ||
+//                             'Government of India'}
+//                     </p>
+//                 </div>
+//             </div>
+
+//             <div style={styles.main}>
+//                 {eligibility?.matchDetails && (
+//                     <div style={styles.card}>
+//                         <h3 style={styles.cardTitle}>
+//                             🎯 Eligibility Analysis
+//                         </h3>
+
+//                         <div style={styles.grid}>
+//                             <div style={styles.infoCard}>
+//                                 <p style={styles.analysisLabel}>
+//                                     Age Status
+//                                 </p>
+//                                 <h4 style={styles.analysisValue}>
+//                                     {eligibility.matchDetails.userAge || 17} Years
+//                                 </h4>
+//                                 <p style={styles.analysisText}>
+//                                     {eligibility.matchDetails.ageMembership >= 0.8
+//                                         ? `Highly Eligible (${(
+//                                               eligibility.matchDetails
+//                                                   .ageMembership * 100
+//                                           ).toFixed(0)}% match)`
+//                                         : eligibility.matchDetails.ageMembership >=
+//                                           0.5
+//                                         ? `Near Eligible (${(
+//                                               eligibility.matchDetails
+//                                                   .ageMembership * 100
+//                                           ).toFixed(0)}% match)`
+//                                         : `Low Match (${(
+//                                               eligibility.matchDetails
+//                                                   .ageMembership * 100
+//                                           ).toFixed(0)}% match)`}
+//                                 </p>
+//                             </div>
+
+//                             <div style={styles.infoCard}>
+//                                 <p style={styles.analysisLabel}>
+//                                     Income Status
+//                                 </p>
+//                                 <h4 style={styles.analysisValue}>
+//                                     ₹
+//                                     {eligibility.matchDetails.userIncome ||
+//                                         50000}
+//                                 </h4>
+//                                 <p style={styles.analysisText}>
+//                                     {eligibility.matchDetails
+//                                         .incomeMembership >= 0.8
+//                                         ? `Highly Eligible (${(
+//                                               eligibility.matchDetails
+//                                                   .incomeMembership * 100
+//                                           ).toFixed(0)}% match)`
+//                                         : eligibility.matchDetails
+//                                               .incomeMembership >= 0.5
+//                                         ? `Near Eligible (${(
+//                                               eligibility.matchDetails
+//                                                   .incomeMembership * 100
+//                                           ).toFixed(0)}% match)`
+//                                         : `Low Match (${(
+//                                               eligibility.matchDetails
+//                                                   .incomeMembership * 100
+//                                           ).toFixed(0)}% match)`}
+//                                 </p>
+//                             </div>
+
+//                             <div style={styles.infoCard}>
+//                                 <p style={styles.analysisLabel}>
+//                                     Final Recommendation
+//                                 </p>
+//                                 <h4 style={styles.analysisValue}>
+//                                     {eligibility.fuzzyLabel === 'HIGH'
+//                                         ? 'Highly Recommended'
+//                                         : eligibility.fuzzyLabel ===
+//                                           'MEDIUM'
+//                                         ? 'Moderately Recommended'
+//                                         : 'Less Suitable'}
+//                                 </h4>
+//                                 <p style={styles.analysisText}>
+//                                     Based on your profile, this
+//                                     scheme is recommended for you.
+//                                 </p>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 )}
+
+//                 <div style={styles.tabBar}>
+//                     {tabs.map((tab) => (
+//                         <button
+//                             key={tab.id}
+//                             onClick={() =>
+//                                 setActiveTab(tab.id)
+//                             }
+//                             style={styles.tabBtn}
+//                         >
+//                             {tab.label}
+//                         </button>
+//                     ))}
+//                 </div>
+
+//                 <div style={styles.card}>
+//                     {activeTab === 'overview' &&
+//                         renderTextBlock(
+//                             scheme?.description,
+//                             'No description available.'
+//                         )}
+
+//                     {activeTab === 'eligibility' &&
+//                         renderTextBlock(
+//                             scheme?.eligibility,
+//                             'No eligibility available.'
+//                         )}
+
+//                     {activeTab === 'benefits' &&
+//                         renderTextBlock(
+//                             scheme?.benefits,
+//                             'No benefits available.'
+//                         )}
+
+//                     {activeTab === 'apply' &&
+//                         renderTextBlock(
+//                             scheme?.application_process,
+//                             'No process available.'
+//                         )}
+
+//                     {activeTab === 'documents' &&
+//                         renderTextBlock(
+//                             scheme?.documents_required,
+//                             'No documents available.'
+//                         )}
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// const styles = {
+//     page: {
+//         minHeight: '100vh',
+//         background: '#f3f4f6',
+//         fontFamily: 'Segoe UI'
+//     },
+//     loadingContainer: {
+//         minHeight: '100vh',
+//         display: 'flex',
+//         flexDirection: 'column',
+//         justifyContent: 'center',
+//         alignItems: 'center'
+//     },
+//     spinner: {
+//         width: '40px',
+//         height: '40px',
+//         border: '4px solid #ddd',
+//         borderTopColor: '#f97316',
+//         borderRadius: '50%'
+//     },
+//     backBtn: {
+//         marginTop: '20px',
+//         padding: '10px 20px'
+//     },
+//     header: {
+//         background: '#fff',
+//         padding: '15px'
+//     },
+//     headerMain: {
+//         maxWidth: '1100px',
+//         margin: '0 auto'
+//     },
+//     hero: {
+//         background:
+//             'linear-gradient(135deg, #1e40af, #ea580c)',
+//         padding: '50px 0'
+//     },
+//     heroInner: {
+//         maxWidth: '1100px',
+//         margin: '0 auto',
+//         padding: '0 20px'
+//     },
+//     heroTitle: {
+//         color: '#fff',
+//         marginTop: '20px'
+//     },
+//     levelBadge: {
+//         background: '#fff',
+//         padding: '5px 12px',
+//         borderRadius: '999px'
+//     },
+//     main: {
+//         maxWidth: '1100px',
+//         margin: '0 auto',
+//         padding: '30px 20px'
+//     },
+//     card: {
+//         background: '#fff',
+//         padding: '25px',
+//         borderRadius: '12px',
+//         marginBottom: '20px'
+//     },
+//     cardTitle: {
+//         marginBottom: '20px'
+//     },
+//     grid: {
+//         display: 'grid',
+//         gridTemplateColumns:
+//             'repeat(auto-fit, minmax(220px, 1fr))',
+//         gap: '15px'
+//     },
+//     infoCard: {
+//         background: '#f9fafb',
+//         padding: '20px',
+//         borderRadius: '10px'
+//     },
+//     tabBar: {
+//         display: 'flex',
+//         gap: '10px',
+//         marginBottom: '20px'
+//     },
+//     tabBtn: {
+//         padding: '10px 16px',
+//         cursor: 'pointer'
+//     },
+//     analysisLabel: {
+//         fontSize: '14px',
+//         color: '#6b7280',
+//         marginBottom: '8px',
+//         fontWeight: '600'
+//     },
+//     analysisValue: {
+//         fontSize: '22px',
+//         fontWeight: '700',
+//         color: '#1f2937',
+//         marginBottom: '10px'
+//     },
+//     analysisText: {
+//         fontSize: '14px',
+//         color: '#4b5563',
+//         lineHeight: '1.6'
+//     }
+// };
+
+// export default SchemeDetail;
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -83,33 +578,166 @@ const SchemeDetail = () => {
         );
     };
 
+    // Cleans a line of its leading bullet/number prefix
+    const cleanLine = (line) => line.replace(/^(\d+[\.\)]\s*|[-*•]\s*)/, '').trim();
+
+    // Detects if a line looks like a numbered step: "1.", "1)", "Step 1" etc.
+    const isNumberedLine = (line) => /^(\d+[\.\)]|Step\s*\d+)/i.test(line.trim());
+
+    // Detects if a line is a bullet
+    const isBulletLine = (line) => /^[-*•]/.test(line.trim());
+
     const renderTextBlock = (text, emptyMsg = 'No information available.') => {
         if (!text) return <p style={{ color: '#9ca3af', fontStyle: 'italic' }}>{emptyMsg}</p>;
-        // Split by numbered lists or bullet patterns for better readability
-        const lines = text.split(/\n/).filter(l => l.trim());
-        if (lines.length <= 1) {
-            return <p style={{ color: '#374151', lineHeight: 1.8, fontSize: '15px' }}>{text}</p>;
+
+        const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+
+        // Single paragraph — just show it
+        if (lines.length === 1) {
+            return <p style={{ color: '#374151', lineHeight: 1.9, fontSize: '15px', margin: 0 }}>{lines[0]}</p>;
         }
+
+        // Numbered list detected
+        const hasNumbered = lines.some(isNumberedLine);
+        if (hasNumbered) {
+            let stepNum = 0;
+            return (
+                <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {lines.map((line, i) => {
+                        const numbered = isNumberedLine(line);
+                        if (numbered) stepNum++;
+                        const content = cleanLine(line);
+                        return (
+                            <li key={i} style={{
+                                display: 'flex',
+                                gap: '14px',
+                                alignItems: 'flex-start',
+                                padding: '13px 16px',
+                                background: numbered ? '#fff7ed' : '#f9fafb',
+                                borderRadius: '10px',
+                                border: `1px solid ${numbered ? '#fed7aa' : '#f3f4f6'}`,
+                            }}>
+                                <span style={{
+                                    minWidth: '28px', height: '28px',
+                                    borderRadius: '50%',
+                                    background: numbered ? '#f97316' : '#e5e7eb',
+                                    color: numbered ? '#fff' : '#6b7280',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontWeight: 700, fontSize: '13px', flexShrink: 0, marginTop: '1px',
+                                }}>
+                                    {numbered ? stepNum : '—'}
+                                </span>
+                                <span style={{ color: '#1f2937', fontSize: '15px', lineHeight: 1.7, fontWeight: numbered ? 500 : 400 }}>
+                                    {content}
+                                </span>
+                            </li>
+                        );
+                    })}
+                </ol>
+            );
+        }
+
+        // Bullet or mixed list
+        const hasBullets = lines.some(isBulletLine);
+        if (hasBullets) {
+            return (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {lines.map((line, i) => {
+                        const isBullet = isBulletLine(line);
+                        const content = cleanLine(line);
+                        return (
+                            <li key={i} style={{
+                                display: 'flex',
+                                gap: '12px',
+                                alignItems: 'flex-start',
+                                padding: '11px 16px',
+                                background: '#f9fafb',
+                                borderRadius: '10px',
+                                border: '1px solid #f3f4f6',
+                            }}>
+                                <span style={{
+                                    color: isBullet ? '#f97316' : '#9ca3af',
+                                    fontWeight: 700, fontSize: '20px',
+                                    lineHeight: 1, flexShrink: 0, marginTop: '2px',
+                                }}>
+                                    {isBullet ? '›' : '–'}
+                                </span>
+                                <span style={{ color: '#374151', fontSize: '15px', lineHeight: 1.7 }}>{content}</span>
+                            </li>
+                        );
+                    })}
+                </ul>
+            );
+        }
+
+        // Plain multi-line paragraphs
         return (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {lines.map((line, i) => (
-                    <li key={i} style={{
-                        display: 'flex',
-                        gap: '12px',
-                        alignItems: 'flex-start',
-                        padding: '10px 14px',
-                        background: '#f9fafb',
-                        borderRadius: '8px',
+                    <p key={i} style={{
+                        color: '#374151', fontSize: '15px', lineHeight: 1.8,
+                        margin: 0, padding: '12px 16px',
+                        background: '#f9fafb', borderRadius: '10px',
                         border: '1px solid #f3f4f6',
-                        color: '#374151',
-                        fontSize: '15px',
-                        lineHeight: 1.6
                     }}>
-                        <span style={{ color: '#f97316', fontWeight: 700, fontSize: '18px', marginTop: '-1px', flexShrink: 0 }}>•</span>
-                        <span>{line.replace(/^[\d\.\-\*•]\s*/, '')}</span>
-                    </li>
+                        {line}
+                    </p>
                 ))}
-            </ul>
+            </div>
+        );
+    };
+
+    // Dedicated step-by-step renderer for "How to Apply"
+    const renderSteps = (text, emptyMsg = 'No application process information available.') => {
+        if (!text) return <p style={{ color: '#9ca3af', fontStyle: 'italic' }}>{emptyMsg}</p>;
+        const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length === 0) return <p style={{ color: '#9ca3af', fontStyle: 'italic' }}>{emptyMsg}</p>;
+
+        let stepNum = 0;
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {lines.map((line, i) => {
+                    const numbered = isNumberedLine(line);
+                    if (numbered) stepNum++;
+                    const content = cleanLine(line);
+                    const isSub = !numbered && isBulletLine(line);
+                    return (
+                        <div key={i} style={{
+                            display: 'flex',
+                            gap: '16px',
+                            alignItems: 'flex-start',
+                            padding: numbered ? '16px 20px' : '10px 20px 10px 64px',
+                            background: numbered ? '#fff' : '#fafafa',
+                            borderRadius: '12px',
+                            border: numbered ? '1.5px solid #fed7aa' : '1px solid #f3f4f6',
+                            boxShadow: numbered ? '0 2px 8px rgba(249,115,22,0.08)' : 'none',
+                        }}>
+                            {numbered && (
+                                <div style={{
+                                    minWidth: '38px', height: '38px',
+                                    borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                                    color: '#fff',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontWeight: 800, fontSize: '15px', flexShrink: 0,
+                                    boxShadow: '0 2px 8px rgba(249,115,22,0.3)',
+                                }}>
+                                    {stepNum}
+                                </div>
+                            )}
+                            <span style={{
+                                color: numbered ? '#1f2937' : '#4b5563',
+                                fontSize: numbered ? '15px' : '14px',
+                                lineHeight: 1.7,
+                                fontWeight: numbered ? 600 : 400,
+                                paddingTop: numbered ? '8px' : 0,
+                            }}>
+                                {isSub ? `› ${content}` : content}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
         );
     };
 
@@ -205,7 +833,7 @@ const SchemeDetail = () => {
 
             {/* Main Content */}
             <div style={styles.main}>
-                
+
                 {/* Eligibility Match Card (if available) */}
                 {eligibility && eligibility.matchDetails && (
                     <div style={{ ...styles.card, marginBottom: '28px', animation: 'fadeIn 0.4s ease' }} className="card">
@@ -320,7 +948,7 @@ const SchemeDetail = () => {
                         <div>
                             <h3 style={styles.sectionTitle}>Application Process</h3>
                             <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '20px' }}>Follow these steps to apply:</p>
-                            {renderTextBlock(scheme?.application_process, 'No application process information available.')}
+                            {renderSteps(scheme?.application_process, 'No application process information available.')}
 
                             {scheme?.scheme_url && (
                                 <div style={{ marginTop: '28px', padding: '20px', background: 'linear-gradient(135deg, #fff7ed, #ffedd5)', borderRadius: '12px', border: '1px solid #fed7aa', textAlign: 'center' }}>
@@ -578,4 +1206,4 @@ const styles = {
     },
 };
 
-export default SchemeDetail;
+export default SchemeDetail

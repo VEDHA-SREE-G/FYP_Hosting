@@ -22,7 +22,7 @@
 //   console.log("Server running on port " + process.env.PORT)
 // );
 
-require("dotenv").config();
+require("dotenv").config({ override: true });
 const express = require("express");
 const cors = require("cors");
 const sequelize = require("./config/db");
@@ -47,6 +47,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/schemes", schemeRoutes);
+app.use("/api/chat", require("./routes/chatRoutes"));
 
 // app.use("/api/ngo-scraper",ngoRoutes);
 

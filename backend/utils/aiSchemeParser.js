@@ -1,6 +1,6 @@
 const Groq = require('groq-sdk');
 const SchemeEligibility = require('../models/schemeEligibility');
-const Scheme = require('../models/scheme');
+const Scheme = require('../models/Schem');
 const SchemeEligibilityParser = require('./schemeEligibilityParser'); // Fallback Parser
 console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++");
 console.log("PROCESS KEY:", process.env.GROQ_API_KEY);

@@ -4,11 +4,14 @@ import UserLogin from './pages/UserLogin';
 import UserRegister from './pages/UserRegister';
 import UserHome from './pages/UserHome';
 import UserProfile from './pages/UserProfile';
+import UserAnalyticsPage from './pages/UserAnalyticsPage';
+import AllSchemes from './pages/AllSchemes';
 import EligibleSchemes from './pages/EligibleSchemes';
 import SchemeDetail from './pages/SchemeDetail';
 import AdminLogin from './pages/AdminLogin';
 import AdminRegister from './pages/AdminRegister';
 import AdminHome from './pages/AdminHome';
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 
 
 // Protected Route Component
@@ -55,7 +58,23 @@ function App() {
             </ProtectedRoute>
           } 
         />
-           <Route 
+        <Route 
+          path="/user/analytics" 
+          element={
+            <ProtectedRoute allowedRole="user">
+              <UserAnalyticsPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/user/all-schemes" 
+          element={
+            <ProtectedRoute allowedRole="user">
+              <AllSchemes />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/user/schemes" 
           element={
             <ProtectedRoute allowedRole="user">
@@ -80,6 +99,14 @@ function App() {
           element={
             <ProtectedRoute allowedRole="admin">
               <AdminHome />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/analytics" 
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <AdminAnalyticsPage />
             </ProtectedRoute>
           } 
         />

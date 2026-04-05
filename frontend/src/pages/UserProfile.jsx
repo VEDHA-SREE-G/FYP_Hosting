@@ -125,6 +125,22 @@ const UserProfile = () => {
   };
 
   const handleSubmit = async () => {
+    // Client-side validations for mandatory fields
+    if (!profile.name || !profile.age || !profile.gender || profile.income === '' || !profile.occupation || !profile.state || !profile.district || !profile.category) {
+      showMessage('error', 'Please fill all mandatory fields marked with *');
+      return;
+    }
+    
+    // Constraints
+    if (Number(profile.age) <= 0 || Number(profile.age) > 120) {
+      showMessage('error', 'Age must be a valid number greater than 0 and up to 120');
+      return;
+    }
+    if (Number(profile.income) < 0) {
+      showMessage('error', 'Income cannot be negative');
+      return;
+    }
+
     setLoading(true);
 
     try {

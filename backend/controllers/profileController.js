@@ -240,8 +240,8 @@ exports.updateProfile = async (req, res) => {
     } = req.body;
 
     // Validation
-    if (age && (age < 0 || age > 120)) {
-      return res.status(400).json({ error: "Invalid age" });
+    if (age !== undefined && (age <= 0 || age > 120)) {
+      return res.status(400).json({ error: "Invalid age. Age must be greater than 0." });
     }
     if (income && income < 0) {
       return res.status(400).json({ error: "Income cannot be negative" });

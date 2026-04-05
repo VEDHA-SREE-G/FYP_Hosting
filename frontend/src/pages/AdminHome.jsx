@@ -24,6 +24,7 @@ import {
   Copy,
   TrendingUp
 } from 'lucide-react';
+import AdminAnalytics from '../components/AdminAnalytics';
 
 const AdminHome = () => {
   const navigate = useNavigate();
@@ -35,8 +36,8 @@ const AdminHome = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [stats, setStats] = useState({
     totalUsers: 0,
-    activeSchemes: 156,
-    applicationsToday: 89,
+    activeSchemes: 0,
+    applicationsToday: 0,
     suspiciousCount: 0
   });
   
@@ -306,6 +307,12 @@ const AdminHome = () => {
             
             <div className="flex items-center space-x-3">
               <button
+                onClick={() => navigate('/admin/analytics')}
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-semibold flex items-center gap-2"
+              >
+                Analytics
+              </button>
+              <button
                 onClick={fetchSuspiciousProfiles}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center gap-2"
               >
@@ -345,8 +352,8 @@ const AdminHome = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">Total Users</p>
-                <p className="text-4xl font-bold text-blue-600">{stats.totalUsers || '1,234'}</p>
-                <p className="text-xs text-gray-500 mt-2">↑ 12% from last month</p>
+                <p className="text-4xl font-bold text-blue-600">{stats.totalUsers}</p>
+                <p className="text-xs text-gray-500 mt-2">Active platform users</p>
               </div>
               <Users className="w-12 h-12 text-blue-500" />
             </div>
@@ -368,7 +375,7 @@ const AdminHome = () => {
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">Applications Today</p>
                 <p className="text-4xl font-bold text-orange-600">{stats.applicationsToday}</p>
-                <p className="text-xs text-gray-500 mt-2">↑ 15% increase</p>
+                <p className="text-xs text-gray-500 mt-2">Applications submitted today</p>
               </div>
               <BarChart3 className="w-12 h-12 text-orange-500" />
             </div>

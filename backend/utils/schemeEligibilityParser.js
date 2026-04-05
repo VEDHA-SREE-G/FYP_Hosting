@@ -1,5 +1,5 @@
 const SchemeEligibility = require('../models/schemeEligibility');
-const Scheme = require('../models/scheme');
+const Scheme = require('../models/Schem');
 
 class SchemeEligibilityParser {
   

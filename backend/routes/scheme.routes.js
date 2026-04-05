@@ -5,9 +5,11 @@ const schemeController = require("../controllers/schemeController");
 const auth = require("../middleware/authMiddleware");
 
 // Sync schemes (Admin only or scheduled task)
-router.post("/sync", async (req, res) => {
+router.post("/sync", auth(["admin"]), async (req, res) => {
   try {
     await scrapeMyScheme();
+    const SchemeEligibilityParser = require("../utils/schemeEligibilityParser");
+    await SchemeEligibilityParser.migrateAllSchemes();
     res.json({ message: "Government schemes synced successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -23,9 +25,12 @@ router.get("/eligible", auth("user"), schemeController.getEligibleSchemes);
 // Get featured/recommended schemes
 router.get("/featured", auth("user"), schemeController.getFeaturedSchemes);
 
-// Get all schemes (Public or User?) - Let's make it User for now to track unique user
-// If we want public access, we can remove auth or make it optional
-router.get("/", auth("user"), schemeController.getSchemes);
+// Get analytical data
+router.get("/analytics", auth("admin"), schemeController.getAdminAnalytics);
+router.get("/user-analytics", auth("user"), schemeController.getUserAnalytics);
+
+// Get all schemes
+router.get("/", auth(["user", "admin"]), schemeController.getSchemes);
 
 // Get single scheme details
 router.get("/:id", auth("user"), schemeController.getSchemeById);

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Chatbot from '../components/Chatbot';
+import UserAnalytics from '../components/UserAnalytics';
 
 const UserHome = () => {
   const navigate = useNavigate();
@@ -84,6 +86,12 @@ const UserHome = () => {
 
             <div className="flex items-center space-x-3">
               <button
+                onClick={() => navigate('/user/analytics')}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              >
+                Analytics
+              </button>
+              <button
                 onClick={() => navigate('/user/profile')}
                 className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-semibold"
               >
@@ -152,23 +160,26 @@ const UserHome = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               onClick={() => navigate('/user/profile')}
-              className="p-6 bg-orange-50 border-2 border-orange-200 rounded-lg hover:bg-orange-100 transition-all text-left"
+              className={`p-6 border-2 rounded-lg transition-all text-left ${dashboardStats.profileComplete ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-orange-50 border-orange-200 hover:bg-orange-100'}`}
             >
-              <div className="text-4xl mb-3">👤</div>
-              <h4 className="font-bold text-gray-800 mb-2">Complete Profile</h4>
-              <p className="text-sm text-gray-600">Update your information to find eligible schemes</p>
+              <div className="text-4xl mb-3">{dashboardStats.profileComplete ? '✅' : '👤'}</div>
+              <h4 className="font-bold text-gray-800 mb-2">{dashboardStats.profileComplete ? 'Profile Complete' : 'Complete Profile'}</h4>
+              <p className="text-sm text-gray-600">{dashboardStats.profileComplete ? 'Your preferences are set to discover perfect schemes.' : 'Update your information to find eligible schemes'}</p>
             </button>
 
-            <button className="p-6 bg-green-50 border-2 border-green-200 rounded-lg hover:bg-green-100 transition-all text-left">
+            <button 
+              onClick={() => navigate('/user/all-schemes')}
+              className="p-6 bg-blue-50 border-2 border-blue-200 rounded-lg hover:bg-blue-100 transition-all text-left"
+            >
               <div className="text-4xl mb-3">🔍</div>
               <h4 className="font-bold text-gray-800 mb-2">Browse All Schemes</h4>
-              <p className="text-sm text-gray-600">Explore available government welfare schemes</p>
+              <p className="text-sm text-gray-600">Explore {dashboardStats.totalSchemes > 0 ? `${dashboardStats.totalSchemes} available` : 'available'} government welfare schemes</p>
             </button>
 
-            <button className="p-6 bg-blue-50 border-2 border-blue-200 rounded-lg hover:bg-blue-100 transition-all text-left">
+            <button className="p-6 bg-purple-50 border-2 border-purple-200 rounded-lg hover:bg-purple-100 transition-all text-left">
               <div className="text-4xl mb-3">📋</div>
               <h4 className="font-bold text-gray-800 mb-2">Track Applications</h4>
-              <p className="text-sm text-gray-600">Check status of your scheme applications</p>
+              <p className="text-sm text-gray-600">{dashboardStats.applicationCount > 0 ? `You have ${dashboardStats.applicationCount} active application(s).` : 'Check status of your scheme applications'}</p>
             </button>
           </div>
         </div>
@@ -227,6 +238,7 @@ const UserHome = () => {
           <p className="text-sm">© 2025 Government of India. All rights reserved.</p>
         </div>
       </footer>
+      <Chatbot />
     </div>
   );
 };
